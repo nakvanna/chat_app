@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "707472785262",
+    "firebase_url": "https://pks-db-default-rtdb.firebaseio.com",
+    "project_id": "pks-db",
+    "storage_bucket": "pks-db.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:707472785262:android:1408c2131e8f96fe3a0b7f",
+        "android_client_info": {
+          "package_name": "com.example.pks_mobile"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "707472785262-nl7lihhfep3954t27927n4h2lr8ejvl6.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.pks_mobile",
+            "certificate_hash": "348e84e7685003213e9c27b8b9f82aae5cb435ca"
+          }
+        },
+        {
+          "client_id": "707472785262-ef5g7vo9m9dtlblkc2d8gkelp48ihnrs.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC1o5yOUHCr2ppRv4CRyYuqlfnXcAZ3GlQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "707472785262-ef5g7vo9m9dtlblkc2d8gkelp48ihnrs.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
