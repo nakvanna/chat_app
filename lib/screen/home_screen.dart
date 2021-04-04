@@ -22,9 +22,13 @@ class HomeScreen extends GetWidget<AuthController> {
                     accountEmail: Obx(() => Text(Constants.myEmail.value)),
                     currentAccountPicture: ClipRRect(
                       borderRadius: BorderRadius.circular(110),
-                      child: Image.network(
-                        'https://www.kindpng.com/picc/m/24-248394_user-icon-hd-png-download.png',
-                        fit: BoxFit.cover,
+                      child: CircleAvatar(
+                        child: Constants.myPhotoUrl.value != null
+                            ? Image.network(
+                                Constants.myPhotoUrl.value,
+                                fit: BoxFit.cover,
+                              )
+                            : Text('Nothing'),
                       ),
                     ),
                   )
@@ -45,9 +49,15 @@ class HomeScreen extends GetWidget<AuthController> {
         title: Text('Home Screen'),
         actions: [
           IconButton(
+            icon: Icon(Icons.videocam),
+            onPressed: () {
+              Get.toNamed('/meeting_room');
+            },
+          ),
+          IconButton(
             icon: Icon(Icons.question_answer),
             onPressed: () {
-              Get.toNamed('/chat_room');
+              Get.toNamed('/group_message');
             },
           ),
         ],
@@ -59,6 +69,7 @@ class HomeScreen extends GetWidget<AuthController> {
             Obx(() => Text(Constants.myUID.value.toString())),
             Obx(() => Text(Constants.myUsername.value.toString())),
             Obx(() => Text(Constants.myEmail.value.toString())),
+            Obx(() => Text(Constants.myPhotoUrl.value.toString())),
           ],
         ),
       ),
