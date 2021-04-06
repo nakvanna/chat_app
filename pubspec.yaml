@@ -38,6 +38,8 @@ dependencies:
   jitsi_meet: ^2.0.0
   intl: ^0.17.0
   firebase_messaging: ^9.1.0
+  flutter_local_notifications: ^5.0.0
+  http: ^0.13.1
 
 dev_dependencies:
   flutter_test:

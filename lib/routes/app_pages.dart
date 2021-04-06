@@ -2,11 +2,12 @@ import 'package:get/get.dart';
 import 'package:pks_mobile/bindings/AuthBinding.dart';
 import 'package:pks_mobile/screen/authentication.dart';
 import 'package:pks_mobile/screen/home_screen.dart';
-import 'package:pks_mobile/screen/list_group_message.dart';
+import 'package:pks_mobile/screen/group_message.dart';
 import 'package:pks_mobile/screen/meeting_room.dart';
 import 'package:pks_mobile/screen/private_message.dart';
 import 'package:pks_mobile/screen/search_partner_to_message.dart';
 import 'package:pks_mobile/screen/splash.dart';
+import 'package:pks_mobile/screen/test_push_notification.dart';
 
 part 'app_routes.dart';
 
@@ -27,7 +28,7 @@ class AppPages {
         name: _Paths.HOME, page: () => HomeScreen(), binding: AuthBinding()),
     GetPage(
         name: _Paths.LIST_GROUP_MESSAGE,
-        page: () => ListGroupMessage(),
+        page: () => GroupMessage(),
         binding: AuthBinding()),
     GetPage(
         name: _Paths.SEARCH_PARTNER_TO_MESSAGE,
@@ -36,10 +37,14 @@ class AppPages {
     GetPage(
         name: _Paths.PRIVATE_MESSAGE,
         page: () => PrivateMessage(),
-        transition: Transition.zoom),
+        transition: Transition.cupertinoDialog),
     GetPage(
         name: _Paths.MEETING_ROOM,
         page: () => MeetingRoom(),
+        transition: Transition.zoom),
+    GetPage(
+        name: _Paths.TEST_PUSH_FCM,
+        page: () => TestPushNotification(),
         transition: Transition.zoom),
   ];
 }

@@ -7,7 +7,7 @@ import 'package:pks_mobile/controllers/db_controller.dart';
 import 'package:pks_mobile/helper/constants.dart';
 import 'package:pks_mobile/widgets/ListTileUser.dart';
 
-class ListGroupMessage extends GetWidget<DbController> {
+class GroupMessage extends GetWidget<DbController> {
   Widget listTileMessageGroup({QueryDocumentSnapshot groupMessageInfo}) {
     var unSeenMessage = groupMessageInfo.data()['Recently'];
     var partnerInfo = groupMessageInfo
@@ -21,6 +21,7 @@ class ListGroupMessage extends GetWidget<DbController> {
           "docId": groupMessageInfo.id,
           "username": partnerInfo[0]['username'],
           "photoUrl": partnerInfo[0]['photoUrl'],
+          "deviceTokens": partnerInfo[0]['deviceTokens'],
         });
       },
       child: ListTileUser(
@@ -44,9 +45,7 @@ class ListGroupMessage extends GetWidget<DbController> {
   Widget build(BuildContext context) {
     return GetBuilder<DbController>(
         initState: (_) {
-          /*DbController()
-          //No to call DbController() again just mention the type because
-          I have bind the DbController in CtrlBindings() and inject to the main.dart*/
+          Constants.currentRoute.value = ModalRoute.of(context).settings.name;
         },
         dispose: (_) {},
         builder: (ctrl) => Scaffold(

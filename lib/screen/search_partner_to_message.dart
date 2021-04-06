@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
@@ -11,24 +12,29 @@ class SearchPartnerToMessage extends GetWidget<DbController> {
   final getUsernameQuerySnapshot = Rx<QuerySnapshot>();
   final getChatRoomExistQuerySnapshot = Rx<QuerySnapshot>();
 
-  createGroupMessage({ctrl, int index}) async {
-    Map<String, String> myInfo = {
+  onTabToCreateGroupMessage({DbController ctrl, int index}) async {
+    String myDeviceToken = await FirebaseMessaging.instance.getToken();
+    Map<String, dynamic> myInfo = {
       "email": Constants.myEmail.value,
       "photoUrl": Constants.myPhotoUrl.value,
       "uid": Constants.myUID.value,
-      "username": Constants.myUsername.value
+      "username": Constants.myUsername.value,
+      "deviceTokens": [myDeviceToken],
     };
     var partnerInfo = getUsernameQuerySnapshot.value.docs[index].data();
     if (myInfo['uid'] != partnerInfo['uid']) {
-      await ctrl.createGroupMessage(partnerId: partnerInfo['uid'], fieldMap: {
-        "Users": [myInfo, partnerInfo],
-        "MatchID": [myInfo['uid'], partnerInfo['uid']],
-        "Recently": {
-          'seen': [myInfo['uid']],
-          'sentAt': DateTime.now(),
-          'message': 'Plz make a chat!'
-        }
-      });
+      await ctrl.createGroupMessage(
+          partnerId: partnerInfo['uid'],
+          fieldMap: {
+            "Users": [myInfo, partnerInfo],
+            "MatchID": [myInfo['uid'], partnerInfo['uid']],
+            "Recently": {
+              'seen': [myInfo['uid']],
+              'sentAt': DateTime.now(),
+              'message': 'Plz make a chat!'
+            }
+          },
+          deviceTokens: partnerInfo['tokenNotification']);
     } else {
       Get.snackbar('Stupid Error', 'You can not message to your self!',
           snackPosition: SnackPosition.BOTTOM);
@@ -38,6 +44,9 @@ class SearchPartnerToMessage extends GetWidget<DbController> {
   @override
   Widget build(BuildContext context) {
     return GetBuilder<DbController>(
+        initState: (_) {
+          Constants.currentRoute.value = ModalRoute.of(context).settings.name;
+        },
         builder: (ctrl) => SafeArea(
               child: Scaffold(
                 body: Container(
@@ -117,7 +126,7 @@ class SearchPartnerToMessage extends GetWidget<DbController> {
                                       ),
                                       InkWell(
                                         onTap: () {
-                                          createGroupMessage(
+                                          onTabToCreateGroupMessage(
                                               ctrl: ctrl, index: index);
                                         },
                                         child: Container(

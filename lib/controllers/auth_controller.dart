@@ -5,6 +5,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:pks_mobile/controllers/db_controller.dart';
 import 'package:pks_mobile/controllers/shared_prefs_controller.dart';
 import 'dart:async';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 class AuthController extends GetxController {
   final isLoginLoading = false.obs;
@@ -16,6 +17,7 @@ class AuthController extends GetxController {
 
   final sharedPrefs = Get.find<SharedPrefs>();
   final dbController = Get.find<DbController>();
+  final deviceToken = ''.obs;
 
   GoogleSignIn _googleSignIn = GoogleSignIn(
     scopes: <String>[
@@ -25,40 +27,64 @@ class AuthController extends GetxController {
   );
 
   @override
-  void onInit() {
+  void onInit() async {
     super.onInit();
     _firebaseUser.bindStream(_auth.authStateChanges());
     _googleSignIn.onCurrentUserChanged.listen((GoogleSignInAccount account) {
       _currentUser.value = account;
     });
+    deviceToken.value = await FirebaseMessaging.instance.getToken();
   }
 
   Future<void> googleSignIn() async {
     try {
       await _googleSignIn.signIn().then((value) async {
-        print(value);
-        if (value != null) {
-          await dbController.uploadUserInfo({
-            'uid': value.id,
-            'email': value.email,
-            'username': value.displayName,
-            'photoUrl': value.photoUrl,
-            'filter': [
-              value.displayName.toLowerCase(),
-              value.email.toLowerCase()
-            ]
-          });
-          sharedPrefs.setUserInfo(
-              isLogin: true,
-              uid: value.id,
-              username: value.displayName,
-              email: value.email,
-              photoUrl: value.photoUrl);
-          Get.offNamed('/home');
-        }
+        print(deviceToken.value);
+        await dbController.uploadUserInfo(userMap: {
+          'uid': value.id,
+          'email': value.email,
+          'username': value.displayName,
+          'photoUrl': value.photoUrl,
+          'filter': [
+            value.displayName.toLowerCase(),
+            value.email.toLowerCase()
+          ],
+          'deviceTokens': [deviceToken.value]
+        });
+        await sharedPrefs.setUserInfo(
+            isLogin: true,
+            uid: value.id,
+            username: value.displayName,
+            email: value.email,
+            photoUrl: value.photoUrl);
+        Get.offNamed('/home');
       });
+      // .then((value) async {
+      //   print(value);
+      //   if (value != null) {
+      //     await dbController.uploadUserInfo(userMap: {
+      //       'uid': value.id,
+      //       'email': value.email,
+      //       'username': value.displayName,
+      //       'photoUrl': value.photoUrl,
+      //       'filter': [
+      //         value.displayName.toLowerCase(),
+      //         value.email.toLowerCase()
+      //       ]
+      //     });
+      // sharedPrefs.setUserInfo(
+      //     isLogin: true,
+      //     uid: value.id,
+      //     username: value.displayName,
+      //     email: value.email,
+      //     photoUrl: value.photoUrl);
+      // Get.offNamed('/home');
+      // }
+      // });
     } catch (error) {
+      print('error here');
       print(error);
+      print(error.message);
     }
   }
 
@@ -71,7 +97,7 @@ class AuthController extends GetxController {
           .createUserWithEmailAndPassword(email: email, password: password)
           .then((value) async {
         if (value != null) {
-          await dbController.uploadUserInfo({
+          await dbController.uploadUserInfo(userMap: {
             'uid': value.user.uid,
             'email': value.user.email,
             'username': username,

@@ -30,7 +30,8 @@ class DbController extends GetxController {
     return _firebase.collection('Users').where('uid', isEqualTo: uid).get();
   }
 
-  Future<void> uploadUserInfo(userMap) async {
+  Future<void> uploadUserInfo({Map<String, dynamic> userMap}) async {
+    print('uploadUserInfo');
     QuerySnapshot snapshot;
     try {
       snapshot = await checkBeforeUploadUserInfo(userMap['uid']);
@@ -57,19 +58,22 @@ class DbController extends GetxController {
     ]).get();
   }
 
-  Future<void> createGroupMessage({fieldMap, String partnerId}) async {
+  Future<void> createGroupMessage(
+      {Map<String, dynamic> fieldMap,
+      String partnerId,
+      String deviceTokens}) async {
     QuerySnapshot snapshot;
     try {
       snapshot = await checkBeforeCreateGroupMessage(partnerId: partnerId);
       if (snapshot.docs.isEmpty) {
-        print('Not existing');
         await _firebase
             .collection('GroupMessage')
             .add(fieldMap)
             .then((value) => Get.toNamed('/private_message', arguments: {
                   "docId": value.id,
                   "username": fieldMap["Users"][1]['username'],
-                  "photoUrl": fieldMap['Users'][1]['photoUrl']
+                  "photoUrl": fieldMap['Users'][1]['photoUrl'],
+                  "deviceTokens": deviceTokens
                 }));
       } else {
         var partnerInfo = snapshot.docs[0]
@@ -80,6 +84,7 @@ class DbController extends GetxController {
           "docId": snapshot.docs[0].id,
           "username": partnerInfo[0]['username'],
           "photoUrl": partnerInfo[0]['photoUrl'],
+          "deviceTokens": deviceTokens
         });
       }
     } catch (e) {}
@@ -133,11 +138,16 @@ class DbController extends GetxController {
   }
 
   addMessage({String docId, messageMap}) async {
-    await _firebase
-        .collection('GroupMessage')
-        .doc(docId)
-        .collection('Messages')
-        .add(messageMap);
+    try {
+      return await _firebase
+          .collection('GroupMessage')
+          .doc(docId)
+          .collection('Messages')
+          .add(messageMap)
+          .then((value) => value.id);
+    } catch (e) {
+      return null;
+    }
   }
 
   getMessages({String docId}) {

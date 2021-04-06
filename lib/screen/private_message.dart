@@ -1,36 +1,46 @@
+import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:pks_mobile/controllers/db_controller.dart';
 import 'package:pks_mobile/helper/constants.dart';
+import 'package:http/http.dart' as http;
 
 class PrivateMessage extends GetWidget<DbController> {
   final messageToSend = TextEditingController();
   final fieldSendIsFocusFtString = false.obs;
   final String _myUID = Constants.myUID.value;
+  final String _myUsername = Constants.myUsername.value;
+  final String _myPhotoUrl = Constants.myPhotoUrl.value;
   final String _docId = Get.arguments['docId'];
   final String _photoUrl = Get.arguments['photoUrl'];
   final String _username = Get.arguments['username'];
+  final List _deviceTokens = Get.arguments['deviceTokens'];
   final showTimeOnThisIndex = 0.obs;
   final toggleThisIndex = false.obs;
 
   sendMessage(DbController ctrl) async {
-    await ctrl.addMessage(docId: _docId, messageMap: {
+    var result = await ctrl.addMessage(docId: _docId, messageMap: {
       'message': messageToSend.text,
       'sentBy': _myUID,
       'isSeen': false,
       'timestamp': DateTime.now().microsecondsSinceEpoch,
     });
-    await ctrl.updateRecentlyMessage(docId: _docId, recentlyMapField: {
-      'message': messageToSend.text,
-      'sentBy': _myUID,
-      'sentAt': DateTime.now(),
-      'seen': [_myUID],
-    });
+
+    if (result != null) {
+      await ctrl.updateRecentlyMessage(docId: _docId, recentlyMapField: {
+        'message': messageToSend.text,
+        'sentBy': _myUID,
+        'sentAt': DateTime.now(),
+        'seen': [_myUID],
+      });
+      sendAndRetrieveMessage(title: _myUsername, body: messageToSend.text);
+    }
     fieldSendIsFocusFtString.value = false;
-    messageToSend.text = ''.trim();
+    messageToSend.text = '';
   }
 
   messageOnTab({int index}) {
@@ -38,10 +48,46 @@ class PrivateMessage extends GetWidget<DbController> {
     toggleThisIndex.value = !toggleThisIndex.value;
   }
 
+  Future<void> sendAndRetrieveMessage({
+    String title,
+    String body,
+  }) async {
+    try {
+      String myDeviceToken = await FirebaseMessaging.instance.getToken();
+      for (int i = 0; i < _deviceTokens.length; i++) {
+        await http.post(
+          Uri.parse('https://fcm.googleapis.com/fcm/send'),
+          headers: <String, String>{
+            'Content-Type': 'application/json',
+            'Authorization': 'key=${Constants.serverToken}',
+          },
+          body: jsonEncode(
+            <String, dynamic>{
+              'notification': <String, dynamic>{'body': body, 'title': title},
+              'priority': 'high',
+              'data': <String, dynamic>{
+                'to': '/private_message',
+                'docId': _docId,
+                "username": _myUsername,
+                "photoUrl": _myPhotoUrl,
+                "deviceTokens": myDeviceToken,
+              },
+              'to': _deviceTokens[i],
+            },
+          ),
+        );
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return GetBuilder<DbController>(
-        initState: (_) {},
+        initState: (_) {
+          Constants.currentRoute.value = ModalRoute.of(context).settings.name;
+        },
         dispose: (_) {},
         builder: (ctrl) => Scaffold(
               appBar: AppBar(
@@ -109,22 +155,21 @@ class PrivateMessage extends GetWidget<DbController> {
                                                           'timestamp']))
                                               .toString())
                                           : Container()),
-                                      InkWell(
-                                        onTap: () {
-                                          messageOnTab(index: index);
-                                        },
-                                        child: Container(
-                                          padding: _messageInfo['sentBy'] ==
-                                                  _myUID
-                                              ? EdgeInsets.fromLTRB(80, 4, 5, 0)
-                                              : EdgeInsets.fromLTRB(
-                                                  5, 4, 80, 0),
-                                          width:
-                                              MediaQuery.of(context).size.width,
-                                          alignment:
-                                              _messageInfo['sentBy'] == _myUID
-                                                  ? Alignment.centerRight
-                                                  : Alignment.centerLeft,
+                                      Container(
+                                        padding: _messageInfo['sentBy'] ==
+                                                _myUID
+                                            ? EdgeInsets.fromLTRB(80, 4, 5, 0)
+                                            : EdgeInsets.fromLTRB(5, 4, 80, 0),
+                                        width:
+                                            MediaQuery.of(context).size.width,
+                                        alignment:
+                                            _messageInfo['sentBy'] == _myUID
+                                                ? Alignment.centerRight
+                                                : Alignment.centerLeft,
+                                        child: InkWell(
+                                          onTap: () {
+                                            messageOnTab(index: index);
+                                          },
                                           child: Container(
                                             padding: EdgeInsets.all(10),
                                             decoration: BoxDecoration(
