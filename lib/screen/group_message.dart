@@ -8,7 +8,8 @@ import 'package:pks_mobile/helper/constants.dart';
 import 'package:pks_mobile/widgets/ListTileUser.dart';
 
 class GroupMessage extends GetWidget<DbController> {
-  Widget listTileMessageGroup({QueryDocumentSnapshot groupMessageInfo}) {
+  Widget listTileMessageGroup(
+      {DbController ctrl, QueryDocumentSnapshot groupMessageInfo}) {
     var unSeenMessage = groupMessageInfo.data()['Recently'];
     var partnerInfo = groupMessageInfo
         .data()['Users']
@@ -17,11 +18,14 @@ class GroupMessage extends GetWidget<DbController> {
 
     return InkWell(
       onTap: () {
-        Get.toNamed('/private_message', arguments: {
-          "docId": groupMessageInfo.id,
-          "username": partnerInfo[0]['username'],
-          "photoUrl": partnerInfo[0]['photoUrl'],
-          "deviceTokens": partnerInfo[0]['deviceTokens'],
+        ctrl.getUserByUID(partnerInfo[0]['uid']).then((value) async {
+          String partnerDeviceToken = await value.docs[0].data()['deviceToken'];
+          await Get.toNamed('/private_message', arguments: {
+            "docId": groupMessageInfo.id,
+            "username": partnerInfo[0]['username'],
+            "photoUrl": partnerInfo[0]['photoUrl'],
+            "deviceToken": partnerDeviceToken,
+          });
         });
       },
       child: ListTileUser(
@@ -74,6 +78,7 @@ class GroupMessage extends GetWidget<DbController> {
                                   itemCount: snapshot.data.docs.length,
                                   itemBuilder: ((context, index) {
                                     return listTileMessageGroup(
+                                        ctrl: ctrl,
                                         groupMessageInfo:
                                             snapshot.data.docs[index]);
                                   }),

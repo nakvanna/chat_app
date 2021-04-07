@@ -5,6 +5,7 @@ import 'package:pks_mobile/helper/constants.dart';
 
 class DbController extends GetxController {
   final _firebase = FirebaseFirestore.instance;
+
   Future<QuerySnapshot> getUserByUsername({String filter}) async {
     return await _firebase
         .collection('Users')
@@ -26,20 +27,29 @@ class DbController extends GetxController {
         .get();
   }
 
-  Future<QuerySnapshot> checkBeforeUploadUserInfo(String uid) {
-    return _firebase.collection('Users').where('uid', isEqualTo: uid).get();
+  Future<QuerySnapshot> checkBeforeUploadUserInfo(String uid) async {
+    return await _firebase
+        .collection('Users')
+        .where('uid', isEqualTo: uid)
+        .get();
   }
 
   Future<void> uploadUserInfo({Map<String, dynamic> userMap}) async {
-    print('uploadUserInfo');
     QuerySnapshot snapshot;
+
     try {
       snapshot = await checkBeforeUploadUserInfo(userMap['uid']);
+
       if (snapshot.docs.isEmpty) {
         await _firebase.collection('Users').add(userMap);
+      } else {
+        await _firebase
+            .collection('Users')
+            .doc(snapshot.docs[0].id)
+            .update({'deviceToken': userMap['deviceToken']});
       }
     } catch (e) {
-      print(e.message);
+      print('Upload user info error: $e');
     }
   }
 
@@ -58,36 +68,32 @@ class DbController extends GetxController {
     ]).get();
   }
 
-  Future<void> createGroupMessage(
-      {Map<String, dynamic> fieldMap,
-      String partnerId,
-      String deviceTokens}) async {
+  updateUsersInGroupMessage({String docId, List<dynamic> users}) async {
+    await _firebase
+        .collection('GroupMessage')
+        .doc(docId)
+        .update({"Users": users});
+  }
+
+  Future<String> createGroupMessage({
+    Map<String, dynamic> fieldMap,
+    String partnerId,
+  }) async {
     QuerySnapshot snapshot;
+
     try {
       snapshot = await checkBeforeCreateGroupMessage(partnerId: partnerId);
+
       if (snapshot.docs.isEmpty) {
-        await _firebase
-            .collection('GroupMessage')
-            .add(fieldMap)
-            .then((value) => Get.toNamed('/private_message', arguments: {
-                  "docId": value.id,
-                  "username": fieldMap["Users"][1]['username'],
-                  "photoUrl": fieldMap['Users'][1]['photoUrl'],
-                  "deviceTokens": deviceTokens
-                }));
+        var result = await _firebase.collection('GroupMessage').add(fieldMap);
+        return result.id;
       } else {
-        var partnerInfo = snapshot.docs[0]
-            .data()['Users']
-            .where((e) => e['uid'] != Constants.myUID.value)
-            .toList();
-        Get.toNamed('/private_message', arguments: {
-          "docId": snapshot.docs[0].id,
-          "username": partnerInfo[0]['username'],
-          "photoUrl": partnerInfo[0]['photoUrl'],
-          "deviceTokens": deviceTokens
-        });
+        return snapshot.docs[0].id;
       }
-    } catch (e) {}
+    } catch (e) {
+      print('Create group message error $e');
+      return 'Error';
+    }
   }
 
   getGroupMessage({String myUID}) {

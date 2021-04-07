@@ -47,7 +47,7 @@ Future<void> main() async {
   );
 
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-  FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+  /*FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
     Firebase.initializeApp();
     print(message.data['deviceTokens'].runtimeType);
     Get.toNamed(message.data['to'], arguments: {
@@ -56,8 +56,8 @@ Future<void> main() async {
       "photoUrl": message.data['photoUrl'],
       "deviceTokens": [message.data['deviceTokens']],
     });
-  });
-  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+  });*/
+  /*FirebaseMessaging.onMessage.listen((RemoteMessage message) {
     RemoteNotification notification = message.notification;
     AndroidNotification android = message.notification?.android;
     if (notification != null &&
@@ -78,7 +78,7 @@ Future<void> main() async {
             ),
           ));
     }
-  });
+  });*/
   runApp(MyApp());
 }
 
@@ -90,7 +90,7 @@ class MyApp extends StatelessWidget {
     Get.lazyPut<SharedPrefs>(() => SharedPrefs());
     return GetMaterialApp(
       onInit: () async {
-        /*FirebaseMessaging.instance
+        FirebaseMessaging.instance
             .getInitialMessage()
             .then((RemoteMessage message) {
           if (message != null) {
@@ -98,7 +98,6 @@ class MyApp extends StatelessWidget {
           }
         });
         FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-          print('On message: ${message.data}');
           RemoteNotification notification = message.notification;
           AndroidNotification android = message.notification?.android;
           if (notification != null && android != null) {
@@ -117,8 +116,16 @@ class MyApp extends StatelessWidget {
           }
         });
         FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-          print('On open add, A new onMessageOpenedApp event was published!');
-        });*/
+          Firebase.initializeApp();
+          print(message.data['deviceTokens'].runtimeType);
+          Get.toNamed(message.data['to'], arguments: {
+            "docId": message.data['docId'],
+            "username": message.data['username'],
+            "photoUrl": message.data['photoUrl'],
+            "deviceToken": message.data['deviceToken'],
+          });
+        });
+
         await Get.find<SharedPrefs>()
             .getUserInfo(); // Because the OnInit has initialized before the initialBinding
         Future.delayed(Duration(seconds: 3), () {

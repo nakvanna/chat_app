@@ -1,3 +1,4 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:pks_mobile/controllers/auth_controller.dart';
@@ -11,7 +12,9 @@ class HomeScreen extends GetWidget<AuthController> {
   @override
   Widget build(BuildContext context) {
     return GetBuilder(
-      initState: (_) {
+      initState: (_) async {
+        Constants.myDeiceToken.value =
+            await FirebaseMessaging.instance.getToken();
         Constants.currentRoute.value = ModalRoute.of(context).settings.name;
       },
       builder: (val) => Scaffold(
@@ -74,6 +77,7 @@ class HomeScreen extends GetWidget<AuthController> {
               Obx(() => Text(Constants.myUsername.value.toString())),
               Obx(() => Text(Constants.myEmail.value.toString())),
               Obx(() => Text(Constants.myPhotoUrl.value.toString())),
+              Obx(() => Text(Constants.myDeiceToken.value.toString())),
             ],
           ),
         ),

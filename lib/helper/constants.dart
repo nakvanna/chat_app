@@ -7,6 +7,8 @@ class Constants {
   static var myEmail = ''.obs;
   static var myPhotoUrl = ''.obs;
 
+  static var myDeiceToken = ''.obs;
+
   static var currentRoute = '/'.obs;
 
   static String accountImageNetwork =

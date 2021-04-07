@@ -18,7 +18,7 @@ class PrivateMessage extends GetWidget<DbController> {
   final String _docId = Get.arguments['docId'];
   final String _photoUrl = Get.arguments['photoUrl'];
   final String _username = Get.arguments['username'];
-  final List _deviceTokens = Get.arguments['deviceTokens'];
+  final String _deviceToken = Get.arguments['deviceToken'];
   final showTimeOnThisIndex = 0.obs;
   final toggleThisIndex = false.obs;
 
@@ -54,29 +54,28 @@ class PrivateMessage extends GetWidget<DbController> {
   }) async {
     try {
       String myDeviceToken = await FirebaseMessaging.instance.getToken();
-      for (int i = 0; i < _deviceTokens.length; i++) {
-        await http.post(
-          Uri.parse('https://fcm.googleapis.com/fcm/send'),
-          headers: <String, String>{
-            'Content-Type': 'application/json',
-            'Authorization': 'key=${Constants.serverToken}',
-          },
-          body: jsonEncode(
-            <String, dynamic>{
-              'notification': <String, dynamic>{'body': body, 'title': title},
-              'priority': 'high',
-              'data': <String, dynamic>{
-                'to': '/private_message',
-                'docId': _docId,
-                "username": _myUsername,
-                "photoUrl": _myPhotoUrl,
-                "deviceTokens": myDeviceToken,
-              },
-              'to': _deviceTokens[i],
+      await http.post(
+        Uri.parse('https://fcm.googleapis.com/fcm/send'),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization': 'key=${Constants.serverToken}',
+        },
+        body: jsonEncode(
+          <String, dynamic>{
+            'notification': <String, dynamic>{'body': body, 'title': title},
+            'priority': 'high',
+            'data': <String, dynamic>{
+              'to': '/private_message',
+              'docId': _docId,
+              "username": _myUsername,
+              "photoUrl": _myPhotoUrl,
+              "deviceToken": myDeviceToken,
             },
-          ),
-        );
-      }
+            // 'to': myDeviceToken,
+            'to': _deviceToken,
+          },
+        ),
+      );
     } catch (e) {
       print(e);
     }
@@ -215,11 +214,7 @@ class PrivateMessage extends GetWidget<DbController> {
                                     ],
                                   );
                                 }))
-                            : Container(
-                                child: Center(
-                                  child: Text('Nothing...!'),
-                                ),
-                              );
+                            : Container();
                       })
                   : Container(),
               bottomSheet: BottomAppBar(

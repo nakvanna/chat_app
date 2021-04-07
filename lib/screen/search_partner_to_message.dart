@@ -13,28 +13,39 @@ class SearchPartnerToMessage extends GetWidget<DbController> {
   final getChatRoomExistQuerySnapshot = Rx<QuerySnapshot>();
 
   onTabToCreateGroupMessage({DbController ctrl, int index}) async {
-    String myDeviceToken = await FirebaseMessaging.instance.getToken();
     Map<String, dynamic> myInfo = {
       "email": Constants.myEmail.value,
       "photoUrl": Constants.myPhotoUrl.value,
       "uid": Constants.myUID.value,
       "username": Constants.myUsername.value,
-      "deviceTokens": [myDeviceToken],
     };
+
     var partnerInfo = getUsernameQuerySnapshot.value.docs[index].data();
+    partnerInfo.remove('filter');
+    String partnerDeviceToken = partnerInfo.remove('deviceToken');
+
+    print(partnerDeviceToken);
     if (myInfo['uid'] != partnerInfo['uid']) {
-      await ctrl.createGroupMessage(
-          partnerId: partnerInfo['uid'],
-          fieldMap: {
-            "Users": [myInfo, partnerInfo],
-            "MatchID": [myInfo['uid'], partnerInfo['uid']],
-            "Recently": {
-              'seen': [myInfo['uid']],
-              'sentAt': DateTime.now(),
-              'message': 'Plz make a chat!'
-            }
-          },
-          deviceTokens: partnerInfo['tokenNotification']);
+      String docId = await ctrl.createGroupMessage(
+        partnerId: partnerInfo['uid'],
+        fieldMap: {
+          "Users": [myInfo, partnerInfo],
+          "MatchID": [myInfo['uid'], partnerInfo['uid']],
+          "Recently": {
+            'seen': [myInfo['uid']],
+            'sentAt': DateTime.now(),
+            'message': 'Plz make a chat!'
+          }
+        },
+      );
+      if (docId != 'Error') {
+        await Get.toNamed('/private_message', arguments: {
+          "docId": docId,
+          "username": partnerInfo['username'],
+          "photoUrl": partnerInfo['photoUrl'],
+          "deviceTokens": partnerDeviceToken
+        });
+      }
     } else {
       Get.snackbar('Stupid Error', 'You can not message to your self!',
           snackPosition: SnackPosition.BOTTOM);

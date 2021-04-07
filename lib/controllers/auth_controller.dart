@@ -39,7 +39,6 @@ class AuthController extends GetxController {
   Future<void> googleSignIn() async {
     try {
       await _googleSignIn.signIn().then((value) async {
-        print(deviceToken.value);
         await dbController.uploadUserInfo(userMap: {
           'uid': value.id,
           'email': value.email,
@@ -49,7 +48,7 @@ class AuthController extends GetxController {
             value.displayName.toLowerCase(),
             value.email.toLowerCase()
           ],
-          'deviceTokens': [deviceToken.value]
+          'deviceToken': deviceToken.value
         });
         await sharedPrefs.setUserInfo(
             isLogin: true,
@@ -59,32 +58,8 @@ class AuthController extends GetxController {
             photoUrl: value.photoUrl);
         Get.offNamed('/home');
       });
-      // .then((value) async {
-      //   print(value);
-      //   if (value != null) {
-      //     await dbController.uploadUserInfo(userMap: {
-      //       'uid': value.id,
-      //       'email': value.email,
-      //       'username': value.displayName,
-      //       'photoUrl': value.photoUrl,
-      //       'filter': [
-      //         value.displayName.toLowerCase(),
-      //         value.email.toLowerCase()
-      //       ]
-      //     });
-      // sharedPrefs.setUserInfo(
-      //     isLogin: true,
-      //     uid: value.id,
-      //     username: value.displayName,
-      //     email: value.email,
-      //     photoUrl: value.photoUrl);
-      // Get.offNamed('/home');
-      // }
-      // });
     } catch (error) {
-      print('error here');
-      print(error);
-      print(error.message);
+      print('Google sign-in error: ${error.message}');
     }
   }
 
