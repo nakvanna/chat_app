@@ -1,10 +1,19 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:get/get.dart';
+import 'package:pks_mobile/controllers/shared_prefs_controller.dart';
 import 'package:pks_mobile/helper/constants.dart';
 
 class DbController extends GetxController {
   final _firebase = FirebaseFirestore.instance;
+  final sharedPrefs = Get.find<SharedPrefs>();
+
+  getUsers() {
+    try {
+      return _firebase.collection('Users').snapshots();
+    } catch (e) {
+      return e;
+    }
+  }
 
   Future<QuerySnapshot> getUserByUsername({String filter}) async {
     return await _firebase
@@ -41,16 +50,20 @@ class DbController extends GetxController {
       snapshot = await checkBeforeUploadUserInfo(userMap['uid']);
 
       if (snapshot.docs.isEmpty) {
-        await _firebase.collection('Users').add(userMap);
+        var res = await _firebase.collection('Users').add(userMap);
+        await sharedPrefs.setUserDocId(docId: res.id);
       } else {
-        await _firebase
-            .collection('Users')
-            .doc(snapshot.docs[0].id)
-            .update({'deviceToken': userMap['deviceToken']});
+        await updateUserInfo(
+            docId: snapshot.docs[0].id,
+            updateField: {'deviceToken': userMap['deviceToken']});
       }
-    } catch (e) {
-      print('Upload user info error: $e');
+    } catch (error) {
+      print('Upload user info error: $error');
     }
+  }
+
+  updateUserInfo({String docId, Map<String, dynamic> updateField}) async {
+    await _firebase.collection('Users').doc(docId).update(updateField);
   }
 
   Future<QuerySnapshot> checkBeforeCreateChatRoom(
@@ -90,57 +103,73 @@ class DbController extends GetxController {
       } else {
         return snapshot.docs[0].id;
       }
-    } catch (e) {
-      print('Create group message error $e');
+    } catch (error) {
+      print('Create group message error $error');
       return 'Error';
     }
   }
 
   getGroupMessage({String myUID}) {
-    return _firebase
-        .collection('GroupMessage')
-        .where('MatchID', arrayContains: myUID)
-        .snapshots();
+    try {
+      return _firebase
+          .collection('GroupMessage')
+          .where('MatchID', arrayContains: myUID)
+          .snapshots();
+    } catch (error) {
+      print('Get group message error $error');
+    }
   }
 
   updateRecentlyMessage({String docId, recentlyMapField}) {
-    _firebase
-        .collection('GroupMessage')
-        .doc(docId)
-        .update({"Recently": recentlyMapField});
+    try {
+      _firebase
+          .collection('GroupMessage')
+          .doc(docId)
+          .update({"Recently": recentlyMapField});
+    } catch (error) {
+      print('Update recently message error $error');
+    }
   }
 
   updateSeenInRecentlyMessage({String docId}) async {
-    var recently, distinctSeen;
-    Future.delayed(const Duration(milliseconds: 1000), () async {
-      await _firebase
-          .collection('GroupMessage')
-          .doc(docId)
-          .get()
-          .then((value) async {
-        recently = value.data()['Recently'];
-        recently['seen'].add(Constants.myUID.value);
-        distinctSeen = recently['seen'].toSet().toList();
-        await _firebase.collection('GroupMessage').doc(docId).update({
-          'Recently': {
-            "sentAt": recently['sentAt'],
-            "message": recently['message'],
-            "seen": distinctSeen,
-            "sentBy": recently['sentBy']
-          }
+    try {
+      var recently, distinctSeen;
+      Future.delayed(const Duration(milliseconds: 1000), () async {
+        await _firebase
+            .collection('GroupMessage')
+            .doc(docId)
+            .get()
+            .then((value) async {
+          recently = value.data()['Recently'];
+          recently['seen'].add(Constants.myUID.value);
+          distinctSeen = recently['seen'].toSet().toList();
+          await _firebase.collection('GroupMessage').doc(docId).update({
+            'Recently': {
+              "sentAt": recently['sentAt'],
+              "message": recently['message'],
+              "seen": distinctSeen,
+              "sentBy": recently['sentBy']
+            }
+          });
         });
       });
-    });
+    } catch (error) {
+      print('Update seen in recently message $error');
+    }
   }
 
   updateSeenInsideMessage(
       {String groupMessageDocId, String messageDocId}) async {
-    await _firebase
-        .collection('GroupMessage')
-        .doc(groupMessageDocId)
-        .collection('Messages')
-        .doc(messageDocId)
-        .update({'isSeen': true});
+    try {
+      await _firebase
+          .collection('GroupMessage')
+          .doc(groupMessageDocId)
+          .collection('Messages')
+          .doc(messageDocId)
+          .update({'isSeen': true});
+    } catch (error) {
+      print('Update seen inside message $error');
+    }
   }
 
   addMessage({String docId, messageMap}) async {
@@ -151,17 +180,22 @@ class DbController extends GetxController {
           .collection('Messages')
           .add(messageMap)
           .then((value) => value.id);
-    } catch (e) {
+    } catch (error) {
+      print(error);
       return null;
     }
   }
 
   getMessages({String docId}) {
-    return _firebase
-        .collection('GroupMessage')
-        .doc(docId)
-        .collection('Messages')
-        .orderBy('timestamp', descending: true)
-        .snapshots();
+    try {
+      return _firebase
+          .collection('GroupMessage')
+          .doc(docId)
+          .collection('Messages')
+          .orderBy('timestamp', descending: true)
+          .snapshots();
+    } catch (error) {
+      print('Get message error $error');
+    }
   }
 }

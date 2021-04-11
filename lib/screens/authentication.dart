@@ -10,6 +10,7 @@ import 'package:pks_mobile/widgets/social_icon.dart';
 
 class Authentication extends GetView<AuthController> {
   final _isSigUp = RxBool(false);
+  final _isGoogleLogin = RxBool(false);
 
   Widget horizontalLine() => Padding(
         padding: EdgeInsets.symmetric(horizontal: 16.0),
@@ -110,24 +111,31 @@ class Authentication extends GetView<AuthController> {
                         Color(0xff187adf),
                         Color(0xff00eaf8),
                       ],
+                      loading: false,
                       iconData: CustomIcon.facebook,
                       onPressed: () {},
                     ),
-                    SocialIcon(
-                      colors: [
-                        Color(0xffff4f38),
-                        Color(0xffff355d),
-                      ],
-                      iconData: CustomIcon.googlePLus,
-                      onPressed: () {
-                        controller.googleSignIn();
-                      },
+                    Obx(
+                      () => SocialIcon(
+                        colors: [
+                          Color(0xffff4f38),
+                          Color(0xffff355d),
+                        ],
+                        iconData: CustomIcon.googlePLus,
+                        loading: _isGoogleLogin.value,
+                        onPressed: () async {
+                          _isGoogleLogin.value = true;
+                          await controller.googleSignIn();
+                          _isGoogleLogin.value = false;
+                        },
+                      ),
                     ),
                     SocialIcon(
                       colors: [
                         Color(0xff17ead9),
                         Color(0xff6078ea),
                       ],
+                      loading: false,
                       iconData: CustomIcon.twitter,
                       onPressed: () {},
                     ),

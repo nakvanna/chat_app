@@ -3,7 +3,7 @@ import 'package:pks_mobile/controllers/auth_controller.dart';
 import 'package:pks_mobile/controllers/db_controller.dart';
 import 'package:pks_mobile/controllers/shared_prefs_controller.dart';
 
-class AuthBinding extends Bindings {
+class ControllerBinding extends Bindings {
   @override
   void dependencies() {
     Get.lazyPut<AuthController>(() => AuthController());

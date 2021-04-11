@@ -22,10 +22,10 @@ class SignUpForm extends GetWidget<AuthController> {
   }
 
   void signMeUp() {
-    if (formKey.currentState.validate()) {
-      isLoading.value = true;
-      controller.createUser(username.text, email.text, password.text);
-    }
+    // if (formKey.currentState.validate()) {
+    //   isLoading.value = true;
+    //   controller.createUser(username.text, email.text, password.text);
+    // }
   }
 
   Widget radioButton(bool isSelected) => Container(

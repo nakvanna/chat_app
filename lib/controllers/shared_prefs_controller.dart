@@ -8,6 +8,12 @@ class SharedPrefs extends GetxController {
   static String usernameKey = 'USERNAME';
   static String emailKey = 'EMAIL';
   static String photoUrlKey = 'PHOTO_URL';
+  static String docIdKey = 'USER_DOC_ID';
+
+  Future<void> setUserDocId({String docId}) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString(docIdKey, docId);
+  }
 
   Future<void> setUserInfo(
       {bool isLogin: false,
@@ -32,12 +38,13 @@ class SharedPrefs extends GetxController {
     /*=====END=====*/
   }
 
-  getUserInfo() async {
+  Future<void> getUserInfo() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     Constants.isLogin.value = prefs.getBool(loginKey) ?? false;
     Constants.myUID.value = prefs.getString(uidKey);
     Constants.myUsername.value = prefs.getString(usernameKey);
     Constants.myEmail.value = prefs.getString(emailKey);
     Constants.myPhotoUrl.value = prefs.getString(photoUrlKey);
+    Constants.myDocId.value = prefs.getString(docIdKey);
   }
 }

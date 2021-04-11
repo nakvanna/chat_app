@@ -6,6 +6,8 @@ import 'package:pks_mobile/controllers/db_controller.dart';
 import 'package:pks_mobile/controllers/shared_prefs_controller.dart';
 import 'dart:async';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:pks_mobile/helper/constants.dart';
+import 'package:pks_mobile/routes/app_pages.dart';
 
 class AuthController extends GetxController {
   final isLoginLoading = false.obs;
@@ -17,7 +19,6 @@ class AuthController extends GetxController {
 
   final sharedPrefs = Get.find<SharedPrefs>();
   final dbController = Get.find<DbController>();
-  final deviceToken = ''.obs;
 
   GoogleSignIn _googleSignIn = GoogleSignIn(
     scopes: <String>[
@@ -33,38 +34,39 @@ class AuthController extends GetxController {
     _googleSignIn.onCurrentUserChanged.listen((GoogleSignInAccount account) {
       _currentUser.value = account;
     });
-    deviceToken.value = await FirebaseMessaging.instance.getToken();
   }
 
   Future<void> googleSignIn() async {
+    String deviceToken = await FirebaseMessaging.instance.getToken();
     try {
-      await _googleSignIn.signIn().then((value) async {
-        await dbController.uploadUserInfo(userMap: {
-          'uid': value.id,
-          'email': value.email,
-          'username': value.displayName,
-          'photoUrl': value.photoUrl,
-          'filter': [
-            value.displayName.toLowerCase(),
-            value.email.toLowerCase()
-          ],
-          'deviceToken': deviceToken.value
-        });
-        await sharedPrefs.setUserInfo(
-            isLogin: true,
-            uid: value.id,
-            username: value.displayName,
-            email: value.email,
-            photoUrl: value.photoUrl);
-        Get.offNamed('/home');
+      var googleSignIn = await _googleSignIn.signIn();
+
+      await dbController.uploadUserInfo(userMap: {
+        'uid': googleSignIn.id,
+        'email': googleSignIn.email,
+        'username': googleSignIn.displayName,
+        'photoUrl': googleSignIn.photoUrl,
+        'filter': [
+          googleSignIn.displayName.toLowerCase(),
+          googleSignIn.email.toLowerCase()
+        ],
+        'deviceToken': deviceToken
       });
+      await sharedPrefs.setUserInfo(
+          isLogin: true,
+          uid: googleSignIn.id,
+          username: googleSignIn.displayName,
+          email: googleSignIn.email,
+          photoUrl: googleSignIn.photoUrl);
+      await Get.offNamed(Routes.HOME);
     } catch (error) {
-      print('Google sign-in error: ${error.message}');
+      print('Google sign-in error: $error');
     }
   }
 
-  Future<void> googleSignOut() =>
-      _googleSignIn.signOut().then((value) => Get.offNamed('/auth'));
+  Future<void> googleSignOut() async {
+    await _googleSignIn.signOut();
+  }
 
   void createUser(String username, String email, String password) async {
     try {
@@ -85,11 +87,11 @@ class AuthController extends GetxController {
               username: username,
               email: value.user.email,
               photoUrl: '');
-          await Get.offAllNamed('/home');
+          await Get.offAllNamed(Routes.HOME);
         }
       });
     } catch (onError) {
-      Get.snackbar("Can't creating this account", onError.message,
+      Get.snackbar("Can't creating this account", onError,
           snackPosition: SnackPosition.BOTTOM);
     }
   }
@@ -108,34 +110,36 @@ class AuthController extends GetxController {
               username: getUsernameQuerySnapshot.value.docs[0].get('username'),
               email: value.user.email,
               photoUrl: '');
-          Get.offAllNamed('/home');
+          Get.offAllNamed(Routes.HOME);
         }
       });
     } catch (onError) {
       isLoginLoading.value = false;
-      Get.snackbar("Can't login this account", onError.message,
+      Get.snackbar("Can't login this account", onError,
           snackPosition: SnackPosition.BOTTOM);
     }
   }
 
   logout() async {
     try {
-      await _auth.signOut().then((value) {
-        sharedPrefs.setUserInfo(
-            isLogin: false, uid: '', username: '', email: '', photoUrl: '');
-        Get.offAllNamed('/auth');
-      });
-    } catch (onError) {
-      Get.snackbar("Can't signout this account", onError.message,
+      await _auth.signOut();
+    } catch (error) {
+      Get.snackbar("Can't sign out this account", error,
           snackPosition: SnackPosition.BOTTOM);
     }
   }
 
   logoutAll() async {
-    await _auth.signOut();
-    await _googleSignIn.signOut();
-    sharedPrefs.setUserInfo(
-        isLogin: false, uid: '', username: '', email: '', photoUrl: '');
-    Get.offAllNamed('/auth');
+    try {
+      await _auth.signOut();
+      await _googleSignIn.signOut();
+      await dbController.updateUserInfo(
+          docId: Constants.myDocId.value, updateField: {'deviceToken': ''});
+      await sharedPrefs.setUserInfo(
+          isLogin: false, uid: '', username: '', email: '', photoUrl: '');
+      await Get.offAllNamed(Routes.AUTH);
+    } catch (error) {
+      print('Log out all error $error');
+    }
   }
 }

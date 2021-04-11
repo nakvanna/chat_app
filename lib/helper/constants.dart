@@ -6,6 +6,7 @@ class Constants {
   static var myUsername = ''.obs;
   static var myEmail = ''.obs;
   static var myPhotoUrl = ''.obs;
+  static var myDocId = ''.obs;
 
   static var myDeiceToken = ''.obs;
 

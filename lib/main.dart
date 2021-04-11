@@ -13,17 +13,13 @@ const AndroidNotificationChannel channel = AndroidNotificationChannel(
   'This channel is used for important notifications.', // description
   importance: Importance.high,
 );
+
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
-  Get.toNamed(message.data['to'], arguments: {
-    "docId": message.data['docId'],
-    "username": message.data['username'],
-    "photoUrl": message.data['photoUrl'],
-    "deviceTokens": [message.data['deviceTokens']],
-  });
+  Get.snackbar('title', 'On background');
 }
 
 Future<void> main() async {
@@ -47,38 +43,7 @@ Future<void> main() async {
   );
 
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-  /*FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-    Firebase.initializeApp();
-    print(message.data['deviceTokens'].runtimeType);
-    Get.toNamed(message.data['to'], arguments: {
-      "docId": message.data['docId'],
-      "username": message.data['username'],
-      "photoUrl": message.data['photoUrl'],
-      "deviceTokens": [message.data['deviceTokens']],
-    });
-  });*/
-  /*FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-    RemoteNotification notification = message.notification;
-    AndroidNotification android = message.notification?.android;
-    if (notification != null &&
-        android != null &&
-        Constants.currentRoute.value != '/private_message') {
-      flutterLocalNotificationsPlugin.show(
-          notification.hashCode,
-          notification.title,
-          notification.body,
-          NotificationDetails(
-            android: AndroidNotificationDetails(
-              channel.id,
-              channel.name,
-              channel.description,
-              // TODO add a proper drawable resource to android, for now using
-              //      one that already exists in example app.
-              icon: 'launch_background',
-            ),
-          ));
-    }
-  });*/
+
   runApp(MyApp());
 }
 
@@ -90,51 +55,49 @@ class MyApp extends StatelessWidget {
     Get.lazyPut<SharedPrefs>(() => SharedPrefs());
     return GetMaterialApp(
       onInit: () async {
+        Future.delayed(Duration(seconds: 3), () {
+          if (Constants.isLogin.value) {
+            Get.toNamed(Routes.HOME);
+          } else
+            Get.toNamed(Routes.AUTH);
+        });
         FirebaseMessaging.instance
             .getInitialMessage()
             .then((RemoteMessage message) {
-          if (message != null) {
-            print('Get init: $message');
-          }
+          Get.snackbar('title', 'Init');
         });
+
         FirebaseMessaging.onMessage.listen((RemoteMessage message) {
           RemoteNotification notification = message.notification;
           AndroidNotification android = message.notification?.android;
+
+          Get.snackbar('title', 'On message');
+
           if (notification != null && android != null) {
             flutterLocalNotificationsPlugin.show(
-                notification.hashCode,
-                notification.title,
-                notification.body,
-                NotificationDetails(
-                  android: AndroidNotificationDetails(
-                    channel.id,
-                    channel.name,
-                    channel.description,
-                    icon: 'launch_background',
-                  ),
-                ));
+              notification.hashCode,
+              notification.title,
+              notification.body,
+              NotificationDetails(
+                android: AndroidNotificationDetails(
+                  channel.id,
+                  channel.name,
+                  channel.description,
+                  icon: 'launch_background',
+                ),
+              ),
+            );
           }
         });
         FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
           Firebase.initializeApp();
-          print(message.data['deviceTokens'].runtimeType);
-          Get.toNamed(message.data['to'], arguments: {
-            "docId": message.data['docId'],
-            "username": message.data['username'],
-            "photoUrl": message.data['photoUrl'],
-            "deviceToken": message.data['deviceToken'],
-          });
+          Get.snackbar('title', 'On message open app');
         });
 
         await Get.find<SharedPrefs>()
             .getUserInfo(); // Because the OnInit has initialized before the initialBinding
-        Future.delayed(Duration(seconds: 3), () {
-          Constants.isLogin.value == false
-              ? Get.offNamed('/auth')
-              : Get.offNamed('/home');
-        });
       },
-      debugShowCheckedModeBanner: true,
+      debugShowCheckedModeBanner: false,
       title: 'PKS Mobile',
       initialRoute: AppPages.INITIAL,
       defaultTransition: Transition.rightToLeft,
