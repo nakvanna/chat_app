@@ -27,42 +27,43 @@ class MeetingRoom extends GetWidget<DbController> {
   @override
   Widget build(BuildContext context) {
     return GetBuilder<DbController>(
-        initState: (_) {
-          JitsiMeet.addListener(JitsiMeetingListener(
-              onConferenceWillJoin: _onConferenceWillJoin,
-              onConferenceJoined: _onConferenceJoined,
-              onConferenceTerminated: _onConferenceTerminated,
-              onPictureInPictureWillEnter: _onPictureInPictureWillEnter,
-              onPictureInPictureTerminated: _onPictureInPictureTerminated,
-              onError: _onError));
-          _joinMeeting();
-        },
-        dispose: (val) {
-          JitsiMeet.removeAllListeners();
-        },
-        builder: (ctrl) => Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [Colors.lightBlueAccent, Colors.purple],
-                ),
-              ),
-              child: Scaffold(
-                backgroundColor: Colors.transparent,
-                appBar: AppBar(
-                  elevation: 0,
-                  backgroundColor: Colors.transparent,
-                  title: const Text('Meeting Room'),
-                ),
-                body: Container(
-                  color: Colors.transparent,
-                  child: Center(
-                    child: Text('Video call area!'),
-                  ),
-                ),
-              ),
-            ));
+      initState: (_) {
+        JitsiMeet.addListener(JitsiMeetingListener(
+            onConferenceWillJoin: _onConferenceWillJoin,
+            onConferenceJoined: _onConferenceJoined,
+            onConferenceTerminated: _onConferenceTerminated,
+            onPictureInPictureWillEnter: _onPictureInPictureWillEnter,
+            onPictureInPictureTerminated: _onPictureInPictureTerminated,
+            onError: _onError));
+        _joinMeeting();
+      },
+      dispose: (val) {
+        JitsiMeet.removeAllListeners();
+      },
+      builder: (ctrl) => Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Colors.lightBlueAccent, Colors.purple],
+          ),
+        ),
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          appBar: AppBar(
+            elevation: 0,
+            backgroundColor: Colors.transparent,
+            title: const Text('Meeting Room'),
+          ),
+          body: Container(
+            color: Colors.transparent,
+            child: Center(
+              child: Text('Video call area!'),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   _joinMeeting() async {
@@ -133,30 +134,30 @@ class MeetingRoom extends GetWidget<DbController> {
 
   void _onConferenceWillJoin({message}) {
     print('_onConferenceWillJoin $message');
-    /*debugPrint("_onConferenceWillJoin broadcasted with message: $message");*/
+    debugPrint("_onConferenceWillJoin broadcasted with message: $message");
   }
 
   void _onConferenceJoined({message}) {
     print('_onConferenceJoined $message');
-    /*debugPrint("_onConferenceJoined broadcasted with message: $message");*/
+    debugPrint("_onConferenceJoined broadcasted with message: $message");
   }
 
   void _onConferenceTerminated({message}) {
     Get.back();
     print('_onConferenceTerminated $message');
-    /*debugPrint("_onConferenceTerminated broadcasted with message: $message");*/
+    debugPrint("_onConferenceTerminated broadcasted with message: $message");
   }
 
   void _onPictureInPictureWillEnter({message}) {
     print('_onPictureInPictureWillEnter $message');
-    /*debugPrint(
-        "_onPictureInPictureWillEnter broadcasted with message: $message");*/
+    debugPrint(
+        "_onPictureInPictureWillEnter broadcasted with message: $message");
   }
 
   void _onPictureInPictureTerminated({message}) {
     print('_onPictureInPictureTerminated $message');
-    /*debugPrint(
-        "_onPictureInPictureTerminated broadcasted with message: $message");*/
+    debugPrint(
+        "_onPictureInPictureTerminated broadcasted with message: $message");
   }
 
   _onError(error) {

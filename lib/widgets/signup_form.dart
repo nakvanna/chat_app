@@ -3,10 +3,13 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:pks_mobile/controllers/auth_controller.dart';
+import 'package:pks_mobile/helper/custom_font_style.dart';
 import 'package:pks_mobile/helper/form_validator.dart';
+import 'package:pks_mobile/routes/app_pages.dart';
 import 'package:pks_mobile/widgets/auth_button.dart';
 
 class SignUpForm extends GetWidget<AuthController> {
+  final CustomFontStyle customFontStyle = CustomFontStyle();
   final formValidator = FormValidator();
   final formKey = GlobalKey<FormState>();
   final isLoading = false.obs;
@@ -71,55 +74,59 @@ class SignUpForm extends GetWidget<AuthController> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Text(
-                'SIGNUP',
-                style: TextStyle(
-                    fontSize: ScreenUtil.getInstance().setSp(45),
-                    letterSpacing: .6,
-                    fontWeight: FontWeight.bold),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'sign-up'.tr,
+                    style: customFontStyle.cardTitleTextStyle(),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      Get.toNamed(Routes.LANGUAGES,
+                          arguments: {'fromAuth': true});
+                    },
+                    color: Colors.grey[600],
+                    icon: Icon(Icons.settings),
+                  ),
+                ],
               ),
               SizedBox(
                 height: ScreenUtil.getInstance().setHeight(30),
               ),
               Text(
-                'Username',
-                style: TextStyle(
-                  fontSize: ScreenUtil.getInstance().setSp(32),
-                ),
+                'username'.tr,
+                style: customFontStyle.labelTextStyle(),
               ),
               TextFormField(
                 validator: ((username) =>
                     formValidator.usernameValidate(username)),
                 controller: username,
                 decoration: InputDecoration(
-                    hintText: 'username',
-                    hintStyle: TextStyle(fontSize: 14.0, color: Colors.grey)),
+                    hintText: 'username'.tr,
+                    hintStyle: customFontStyle.placeHolderTextStyle()),
               ),
               SizedBox(
                 height: ScreenUtil.getInstance().setHeight(30),
               ),
               Text(
-                'Email',
-                style: TextStyle(
-                  fontSize: ScreenUtil.getInstance().setSp(32),
-                ),
+                'email'.tr,
+                style: customFontStyle.labelTextStyle(),
               ),
               TextFormField(
                 validator: ((email) =>
                     formValidator.emailValidate(email.isEmail)),
                 controller: email,
                 decoration: InputDecoration(
-                    hintText: 'email',
-                    hintStyle: TextStyle(fontSize: 14.0, color: Colors.grey)),
+                    hintText: 'email'.tr,
+                    hintStyle: customFontStyle.placeHolderTextStyle()),
               ),
               SizedBox(
                 height: ScreenUtil.getInstance().setHeight(30),
               ),
               Text(
-                'password',
-                style: TextStyle(
-                  fontSize: ScreenUtil.getInstance().setSp(32),
-                ),
+                'password'.tr,
+                style: customFontStyle.labelTextStyle(),
               ),
               TextFormField(
                 validator: ((password) =>
@@ -127,17 +134,15 @@ class SignUpForm extends GetWidget<AuthController> {
                 controller: password,
                 obscureText: true,
                 decoration: InputDecoration(
-                    hintText: 'password',
-                    hintStyle: TextStyle(fontSize: 14.0, color: Colors.grey)),
+                    hintText: 'password'.tr,
+                    hintStyle: customFontStyle.placeHolderTextStyle()),
               ),
               SizedBox(
                 height: ScreenUtil.getInstance().setHeight(30),
               ),
               Text(
-                're-password',
-                style: TextStyle(
-                  fontSize: ScreenUtil.getInstance().setSp(32),
-                ),
+                're-password'.tr,
+                style: customFontStyle.labelTextStyle(),
               ),
               TextFormField(
                 validator: ((rePassword) => formValidator.rePasswordValidate(
@@ -145,8 +150,8 @@ class SignUpForm extends GetWidget<AuthController> {
                 controller: rePassword,
                 obscureText: true,
                 decoration: InputDecoration(
-                    hintText: 're-password',
-                    hintStyle: TextStyle(fontSize: 14.0, color: Colors.grey)),
+                    hintText: 're-password'.tr,
+                    hintStyle: customFontStyle.placeHolderTextStyle()),
               ),
               SizedBox(
                 height: ScreenUtil.getInstance().setHeight(20),
@@ -156,7 +161,7 @@ class SignUpForm extends GetWidget<AuthController> {
                 children: <Widget>[
                   Obx(() => AuthButton(
                       loading: isLoading.value,
-                      label: 'SIGNUP',
+                      label: 'signup'.tr,
                       onPressed: signMeUp)),
                 ],
               ),

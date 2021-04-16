@@ -1,25 +1,25 @@
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:pks_mobile/controllers/db_controller.dart';
+import 'package:pks_mobile/widgets/screen_background_color.dart';
 
 class Users extends GetWidget<DbController> {
+  final TextEditingController _filter = TextEditingController(text: '');
   final isSelected = false.obs;
 
   Widget build(BuildContext context) {
     // TODO: implement build
     return GetBuilder<DbController>(
       builder: (ctrl) => SafeArea(
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [Colors.lightBlueAccent, Colors.purple],
-            ),
-          ),
-          child: Scaffold(
+        child: screenBackgroundColor(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Colors.lightBlueAccent, Colors.purple],
+          scaffold: Scaffold(
             backgroundColor: Colors.transparent,
             body: StreamBuilder(
               stream: ctrl.getUsers(),
@@ -31,9 +31,14 @@ class Users extends GetWidget<DbController> {
                     ConnectionState.waiting) {
                   return Center(child: CircularProgressIndicator());
                 } else if (snapshot.hasData) {
+                  var _userInfo = Rx<List<QueryDocumentSnapshot>>();
+                  _userInfo.value = snapshot.data.docs;
+                  print(_userInfo.runtimeType);
+
                   return CustomScrollView(
                     slivers: [
                       SliverAppBar(
+                        backgroundColor: Colors.transparent,
                         actions: [
                           TextButton(
                             style: ButtonStyle(
@@ -62,17 +67,25 @@ class Users extends GetWidget<DbController> {
                         ),
                         flexibleSpace: FlexibleSpaceBar(
                           background: Container(
+                            color: Colors.transparent,
                             padding: EdgeInsets.only(top: 50),
                             child: Container(
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.only(
-                                  bottomRight: Radius.circular(10),
-                                  bottomLeft: Radius.circular(10),
-                                ),
-                              ),
                               child: TextField(
-                                onChanged: (val) {},
+                                onChanged: (val) {
+                                  if (val != '') {
+                                    _userInfo.value = snapshot.data.docs
+                                        .where((element) =>
+                                            element
+                                                .data()['username']
+                                                .toString()
+                                                .toLowerCase() ==
+                                            val.toLowerCase())
+                                        .toList();
+                                  } else {
+                                    _userInfo.value = snapshot.data.docs;
+                                  }
+                                },
+                                controller: _filter,
                                 decoration: InputDecoration(
                                     icon: Icon(Icons.search),
                                     hintText: 'Search ...',
@@ -83,13 +96,14 @@ class Users extends GetWidget<DbController> {
                           ),
                         ),
                       ),
-                      SliverList(
-                        delegate: SliverChildBuilderDelegate((context, index) {
-                          var userInfo = snapshot.data.docs[index].data();
-                          userInfo.putIfAbsent('isChecked', () => true);
+                      Obx(
+                        () => SliverList(
+                          delegate:
+                              SliverChildBuilderDelegate((context, index) {
+                            var userInfo = _userInfo.value[index].data();
+                            userInfo.putIfAbsent('isChecked', () => true);
 
-                          return Obx(
-                            () => CheckboxListTile(
+                            return CheckboxListTile(
                               secondary: userInfo['photoUrl'] == ""
                                   ? Image.asset(
                                       'assets/images/account_image.png',
@@ -108,41 +122,18 @@ class Users extends GetWidget<DbController> {
                                 userInfo['isChecked'] = value;
                                 print(userInfo);
                               },
-                            ),
-                          );
-                        }, childCount: snapshot.data.docs.length),
-                      ),
+                            );
+                          }, childCount: _userInfo.value.length),
+                        ),
+                      )
                     ],
                   );
                 } else {
-                  return Text('Nothing here...');
+                  return Text(
+                    'empty'.tr,
+                  );
                 }
               },
-              /*child: CustomScrollView(
-                slivers: [
-                  ctrl.getGroupMessage(myUID: Constants.myUID.value) != null
-                      ? StreamBuilder<QuerySnapshot>(
-                          stream:
-                              ctrl.getGroupMessage(myUID: Constants.myUID.value),
-                          builder: (BuildContext context,
-                              AsyncSnapshot<QuerySnapshot> snapshot) {
-                            if (snapshot.hasError) {
-                              return Text('Something went wrong');
-                            } else if (snapshot.connectionState ==
-                                ConnectionState.waiting) {
-                              return Center(child: Text("Loading...!"));
-                            }
-                            return ListView.builder(
-                              itemCount: snapshot.data.docs.length,
-                              itemBuilder: ((context, index) {
-                                return Text('Hello');
-                              }),
-                            );
-                          },
-                        )
-                      : Text('No work'),*/ /*
-                ],
-              ),*/
             ),
           ),
         ),

@@ -5,10 +5,13 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:pks_mobile/controllers/db_controller.dart';
 import 'package:pks_mobile/helper/constants.dart';
+import 'package:pks_mobile/helper/custom_font_style.dart';
 import 'package:pks_mobile/routes/app_pages.dart';
 import 'package:pks_mobile/widgets/ListTileUser.dart';
+import 'package:pks_mobile/widgets/screen_background_color.dart';
 
 class GroupMessage extends GetWidget<DbController> {
+  final CustomFontStyle customFontStyle = CustomFontStyle();
   final String _myUID = Constants.myUID.value;
 
   Widget listTileMessageGroup(
@@ -57,20 +60,20 @@ class GroupMessage extends GetWidget<DbController> {
       },
       dispose: (_) {},
       builder: (ctrl) {
-        return Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [Colors.lightBlueAccent, Colors.purple],
-            ),
-          ),
-          child: Scaffold(
+        return screenBackgroundColor(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Colors.lightBlueAccent, Colors.purple],
+          scaffold: Scaffold(
             backgroundColor: Colors.transparent,
             appBar: AppBar(
+              centerTitle: true,
               elevation: 0,
               backgroundColor: Colors.transparent,
-              title: Text('Messages'),
+              title: Text(
+                'messages'.tr,
+                style: customFontStyle.appBarTitleTextStyle(),
+              ),
               actions: [
                 IconButton(
                   onPressed: () {
@@ -85,17 +88,26 @@ class GroupMessage extends GetWidget<DbController> {
               builder: (BuildContext context,
                   AsyncSnapshot<QuerySnapshot> snapshot) {
                 if (snapshot.hasError) {
-                  return Text('Something went wrong');
+                  return Text(
+                    'error occurred'.tr,
+                    style: customFontStyle.labelTextStyle(),
+                  );
                 } else if (snapshot.connectionState ==
                     ConnectionState.waiting) {
                   return Center(
-                    child: Text("Loading...!"),
+                    child: Text(
+                      "loading".tr,
+                      style: customFontStyle.labelTextStyle(),
+                    ),
                   );
                 } else if (snapshot.hasData) {
                   return snapshot.data.docs.length == 0
                       ? Container(
                           child: Center(
-                            child: Text('The chat room is empty...!'),
+                            child: Text(
+                              'empty'.tr,
+                              style: customFontStyle.labelTextStyle(),
+                            ),
                           ),
                         )
                       : ListView.builder(
@@ -107,7 +119,10 @@ class GroupMessage extends GetWidget<DbController> {
                           }),
                         );
                 } else {
-                  return Text('Nothing here...!');
+                  return Text(
+                    'empty'.tr,
+                    style: customFontStyle.labelTextStyle(),
+                  );
                 }
               },
             ),

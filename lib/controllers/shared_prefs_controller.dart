@@ -8,19 +8,35 @@ class SharedPrefs extends GetxController {
   static String usernameKey = 'USERNAME';
   static String emailKey = 'EMAIL';
   static String photoUrlKey = 'PHOTO_URL';
+  static String typeKey = 'TYPE';
   static String docIdKey = 'USER_DOC_ID';
+  static String languageKey = 'LANGUAGE_KEY';
+
+  Future<void> setType({String type}) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString(typeKey, type);
+    Constants.myType.value = type;
+  }
+
+  Future<void> setLanguage({String language}) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString(languageKey, language);
+    Constants.language.value = language;
+  }
 
   Future<void> setUserDocId({String docId}) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString(docIdKey, docId);
+    Constants.myDocId.value = docId;
   }
 
-  Future<void> setUserInfo(
-      {bool isLogin: false,
-      String uid,
-      String username,
-      String email,
-      String photoUrl}) async {
+  Future<void> setUserInfo({
+    bool isLogin: false,
+    String uid,
+    String username,
+    String email,
+    String photoUrl,
+  }) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     /*Set to SharedPreferences*/
     await prefs.setBool(loginKey, isLogin);
@@ -36,6 +52,16 @@ class SharedPrefs extends GetxController {
     Constants.myEmail.value = email;
     Constants.myPhotoUrl.value = photoUrl;
     /*=====END=====*/
+  }
+
+  Future<void> getType() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    Constants.myType.value = prefs.getString(typeKey) ?? 'student';
+  }
+
+  Future<void> getLanguage() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    Constants.language.value = prefs.getString(languageKey) ?? 'English';
   }
 
   Future<void> getUserInfo() async {

@@ -6,8 +6,8 @@ import 'package:http/http.dart' as http;
 
 class HelperFunction {
   static Future<void> sendPushNotificationMessage({
-    @required String title,
-    @required String body,
+    @required String notificationTitle,
+    @required String notificationBody,
     @required Map<String, dynamic> notificationData,
   }) async {
     try {
@@ -20,7 +20,10 @@ class HelperFunction {
         },
         body: jsonEncode(
           <String, dynamic>{
-            'notification': <String, dynamic>{'body': body, 'title': title},
+            'notification': <String, dynamic>{
+              'body': notificationBody,
+              'title': notificationTitle
+            },
             'priority': 'high',
             'data': notificationData,
             // 'to': myDeviceToken,

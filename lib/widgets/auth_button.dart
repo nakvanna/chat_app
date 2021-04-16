@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:pks_mobile/helper/custom_font_style.dart';
 
 class AuthButton extends StatelessWidget {
+  final CustomFontStyle customFontStyle = CustomFontStyle();
   final bool loading;
   final String label;
   final Function onPressed;
@@ -53,11 +55,7 @@ class AuthButton extends StatelessWidget {
                   child: Center(
                     child: Text(
                       label,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18.0,
-                        letterSpacing: 1.0,
-                      ),
+                      style: customFontStyle.btnSignInSignUpTextStyle(),
                     ),
                   ),
                 ),

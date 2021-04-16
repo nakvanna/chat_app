@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:pks_mobile/controllers/auth_controller.dart';
+import 'package:pks_mobile/helper/custom_font_style.dart';
 import 'package:pks_mobile/helper/form_validator.dart';
+import 'package:pks_mobile/routes/app_pages.dart';
 import 'package:pks_mobile/widgets/auth_button.dart';
 
 class LoginForm extends GetWidget<AuthController> {
+  final CustomFontStyle customFontStyle = CustomFontStyle();
   final formKey = GlobalKey<FormState>();
   final email = TextEditingController();
   final password = TextEditingController();
@@ -67,38 +70,44 @@ class LoginForm extends GetWidget<AuthController> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Text(
-                'Login',
-                style: TextStyle(
-                    fontSize: ScreenUtil.getInstance().setSp(45),
-                    letterSpacing: .6,
-                    fontWeight: FontWeight.bold),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'sign-in'.tr,
+                    style: customFontStyle.cardTitleTextStyle(),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      Get.toNamed(Routes.LANGUAGES,
+                          arguments: {'fromAuth': true});
+                    },
+                    color: Colors.grey[600],
+                    icon: Icon(Icons.settings),
+                  ),
+                ],
               ),
               SizedBox(
                 height: ScreenUtil.getInstance().setHeight(30),
               ),
               Text(
-                'Email',
-                style: TextStyle(
-                  fontSize: ScreenUtil.getInstance().setSp(32),
-                ),
+                'email'.tr,
+                style: customFontStyle.labelTextStyle(),
               ),
               TextFormField(
                 validator: ((email) =>
                     formValidator.emailValidate(email.isEmail)),
                 controller: email,
                 decoration: InputDecoration(
-                    hintText: 'email',
-                    hintStyle: TextStyle(fontSize: 14.0, color: Colors.grey)),
+                    hintText: 'email'.tr,
+                    hintStyle: customFontStyle.placeHolderTextStyle()),
               ),
               SizedBox(
                 height: ScreenUtil.getInstance().setHeight(30),
               ),
               Text(
-                'password',
-                style: TextStyle(
-                  fontSize: ScreenUtil.getInstance().setSp(32),
-                ),
+                'password'.tr,
+                style: customFontStyle.labelTextStyle(),
               ),
               TextFormField(
                 validator: ((password) =>
@@ -106,8 +115,8 @@ class LoginForm extends GetWidget<AuthController> {
                 controller: password,
                 obscureText: true,
                 decoration: InputDecoration(
-                    hintText: 'password',
-                    hintStyle: TextStyle(fontSize: 14.0, color: Colors.grey)),
+                    hintText: 'password'.tr,
+                    hintStyle: customFontStyle.placeHolderTextStyle()),
               ),
               SizedBox(
                 height: ScreenUtil.getInstance().setHeight(35),
@@ -116,10 +125,10 @@ class LoginForm extends GetWidget<AuthController> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: <Widget>[
                   Text(
-                    'Forget password?',
+                    'forget password'.tr,
                     style: TextStyle(
                       color: Colors.blue,
-                      fontSize: ScreenUtil.getInstance().setSp(28),
+                      fontSize: 14,
                     ),
                   ),
                 ],
@@ -143,7 +152,7 @@ class LoginForm extends GetWidget<AuthController> {
                         width: 8.0,
                       ),
                       Text(
-                        'Remember me!',
+                        'remember me'.tr,
                         style: TextStyle(
                           fontSize: 12.0,
                         ),
@@ -151,7 +160,7 @@ class LoginForm extends GetWidget<AuthController> {
                     ],
                   ),
                   Obx(() => AuthButton(
-                        label: 'SIGNIN',
+                        label: 'signin'.tr,
                         loading: controller.isLoginLoading.value,
                         onPressed: signMeIn,
                       ))

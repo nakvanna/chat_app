@@ -6,7 +6,10 @@ class Constants {
   static var myUsername = ''.obs;
   static var myEmail = ''.obs;
   static var myPhotoUrl = ''.obs;
+  static var myType = 'student'.obs;
   static var myDocId = ''.obs;
+
+  static var language = 'English'.obs;
 
   static var myDeiceToken = ''.obs;
 

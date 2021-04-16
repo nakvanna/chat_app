@@ -3,12 +3,15 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:pks_mobile/controllers/auth_controller.dart';
+import 'package:pks_mobile/helper/constants.dart';
+import 'package:pks_mobile/helper/custom_font_style.dart';
 import 'package:pks_mobile/widgets/custom_icon.dart';
-import 'package:pks_mobile/widgets/login_form.dart';
+import 'package:pks_mobile/widgets/signin_form.dart';
 import 'package:pks_mobile/widgets/signup_form.dart';
 import 'package:pks_mobile/widgets/social_icon.dart';
 
 class Authentication extends GetView<AuthController> {
+  final CustomFontStyle customFontStyle = CustomFontStyle();
   final _isSigUp = RxBool(false);
   final _isGoogleLogin = RxBool(false);
 
@@ -69,12 +72,10 @@ class Authentication extends GetView<AuthController> {
                       width: ScreenUtil.getInstance().setWidth(110),
                       height: ScreenUtil.getInstance().setHeight(110),
                     ),
-                    Text(
-                      'LOGO',
-                      style: TextStyle(
-                        fontSize: ScreenUtil.getInstance().setSp(46),
-                        letterSpacing: .6,
-                        fontWeight: FontWeight.bold,
+                    Obx(
+                      () => Text(
+                        'ponlok khmer school'.tr,
+                        style: customFontStyle.appBarTitleTextStyle(),
                       ),
                     ),
                   ],
@@ -91,10 +92,8 @@ class Authentication extends GetView<AuthController> {
                   children: <Widget>[
                     horizontalLine(),
                     Text(
-                      'Social Login',
-                      style: TextStyle(
-                        fontSize: 16.0,
-                      ),
+                      'social login'.tr,
+                      style: customFontStyle.labelTextStyle(),
                     ),
                     horizontalLine(),
                   ],
@@ -148,8 +147,8 @@ class Authentication extends GetView<AuthController> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     Text(
-                      'New User? ',
-                      style: TextStyle(),
+                      'new user? '.tr,
+                      style: customFontStyle.labelTextStyle(),
                     ),
                     InkWell(
                       onTap: () {
@@ -158,21 +157,17 @@ class Authentication extends GetView<AuthController> {
                       child: Obx(() {
                         return _isSigUp.value == false
                             ? Text(
-                                'SIGNUP',
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xff5d74e3)),
+                                'sign-up'.tr,
+                                style: customFontStyle.linkLabelTextStyle(),
                               )
                             : Text(
-                                'SIGNIN',
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xff5d74e3)),
+                                'sign-in'.tr,
+                                style: customFontStyle.linkLabelTextStyle(),
                               );
                       }),
                     )
                   ],
-                )
+                ),
               ],
             ),
           ))

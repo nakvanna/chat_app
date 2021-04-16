@@ -53,11 +53,12 @@ class AuthController extends GetxController {
         'deviceToken': deviceToken
       });
       await sharedPrefs.setUserInfo(
-          isLogin: true,
-          uid: googleSignIn.id,
-          username: googleSignIn.displayName,
-          email: googleSignIn.email,
-          photoUrl: googleSignIn.photoUrl);
+        isLogin: true,
+        uid: googleSignIn.id,
+        username: googleSignIn.displayName,
+        email: googleSignIn.email,
+        photoUrl: googleSignIn.photoUrl,
+      );
       await Get.offNamed(Routes.HOME);
     } catch (error) {
       print('Google sign-in error: $error');
@@ -133,10 +134,12 @@ class AuthController extends GetxController {
     try {
       await _auth.signOut();
       await _googleSignIn.signOut();
+      print('Where is my doc ID ${Constants.myDocId.value}');
       await dbController.updateUserInfo(
           docId: Constants.myDocId.value, updateField: {'deviceToken': ''});
       await sharedPrefs.setUserInfo(
           isLogin: false, uid: '', username: '', email: '', photoUrl: '');
+      await sharedPrefs.setUserDocId(docId: '');
       await Get.offAllNamed(Routes.AUTH);
     } catch (error) {
       print('Log out all error $error');

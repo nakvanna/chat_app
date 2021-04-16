@@ -63,29 +63,34 @@ class DbController extends GetxController {
   }
 
   updateUserInfo({String docId, Map<String, dynamic> updateField}) async {
-    await _firebase.collection('Users').doc(docId).update(updateField);
-  }
-
-  Future<QuerySnapshot> checkBeforeCreateChatRoom(
-      String myUsername, String partnerName) {
-    return _firebase.collection('ChatRoom').where('ChatRoomId', whereIn: [
-      '${myUsername}_$partnerName',
-      '${partnerName}_$myUsername'
-    ]).get();
+    try {
+      await _firebase.collection('Users').doc(docId).update(updateField);
+    } catch (error) {
+      print('Update user info error $error');
+    }
   }
 
   Future<QuerySnapshot> checkBeforeCreateGroupMessage({String partnerId}) {
-    return _firebase.collection('GroupMessage').where('MatchID', whereIn: [
-      [Constants.myUID.value, partnerId],
-      [partnerId, Constants.myUID.value],
-    ]).get();
+    try {
+      return _firebase.collection('GroupMessage').where('MatchID', whereIn: [
+        [Constants.myUID.value, partnerId],
+        [partnerId, Constants.myUID.value],
+      ]).get();
+    } catch (error) {
+      print('Check before create group message $error');
+      return null;
+    }
   }
 
   updateUsersInGroupMessage({String docId, List<dynamic> users}) async {
-    await _firebase
-        .collection('GroupMessage')
-        .doc(docId)
-        .update({"Users": users});
+    try {
+      await _firebase
+          .collection('GroupMessage')
+          .doc(docId)
+          .update({"Users": users});
+    } catch (error) {
+      print('Update user in group message $error');
+    }
   }
 
   Future<String> createGroupMessage({

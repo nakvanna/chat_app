@@ -9,9 +9,13 @@ abstract class Routes {
   static const PRIVATE_MESSAGE = _Paths.PRIVATE_MESSAGE;
   static const MEETING_ROOM = _Paths.MEETING_ROOM;
   static const SPLASH = _Paths.SPLASH;
-  static const TEST_PUSH_FCM = _Paths.TEST_PUSH_FCM;
   static const GROUP_CREATOR = _Paths.GROUP_CREATOR;
   static const USER = _Paths.USER;
+  static const SETTINGS = _Paths.SETTINGS;
+  static const LANGUAGES = _Paths.LANGUAGES;
+  static const STUDENT_CLASSES = _Paths.STUDENT_CLASSES;
+  static const TEACHER_CLASSES = _Paths.TEACHER_CLASSES;
+  static const NOTIFICATIONS = _Paths.NOTIFICATIONS;
 }
 
 abstract class _Paths {
@@ -22,7 +26,11 @@ abstract class _Paths {
   static const SEARCH_PARTNER_TO_MESSAGE = '/search_private_to_message';
   static const PRIVATE_MESSAGE = '/private_message';
   static const MEETING_ROOM = '/meeting_room';
-  static const TEST_PUSH_FCM = '/test_push_fcm';
   static const GROUP_CREATOR = '/group_creator';
   static const USER = '/user';
+  static const SETTINGS = '/settings';
+  static const LANGUAGES = '/language_setting';
+  static const STUDENT_CLASSES = '/student_classes';
+  static const TEACHER_CLASSES = '/teacher_classes';
+  static const NOTIFICATIONS = '/notifications';
 }

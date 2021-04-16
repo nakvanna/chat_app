@@ -1,8 +1,11 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:pks_mobile/helper/constants.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:pks_mobile/routes/app_pages.dart';
+import 'package:pks_mobile/screens/home_screen.dart';
+import 'package:pks_mobile/translations/text_translation.dart';
 import 'controllers/shared_prefs_controller.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -19,12 +22,15 @@ final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
-  Get.snackbar('title', 'On background');
+
+  print('On background ${message.data}');
 }
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
   /// Create an Android Notification Channel.
   /// We use this channel in the `AndroidManifest.xml` file to override the
@@ -42,8 +48,6 @@ Future<void> main() async {
     sound: true,
   );
 
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-
   runApp(MyApp());
 }
 
@@ -55,23 +59,28 @@ class MyApp extends StatelessWidget {
     Get.lazyPut<SharedPrefs>(() => SharedPrefs());
     return GetMaterialApp(
       onInit: () async {
-        Future.delayed(Duration(seconds: 3), () {
-          if (Constants.isLogin.value) {
-            Get.toNamed(Routes.HOME);
-          } else
-            Get.toNamed(Routes.AUTH);
+        await Get.find<SharedPrefs>()
+            .getUserInfo(); // Because the OnInit has initialized before the initialBinding
+        await Get.find<SharedPrefs>().getLanguage();
+
+        await Future.delayed(Duration(seconds: 3), () {
+          Get.snackbar('Title', 'before init');
+          if (Constants.isLogin.value == true) {
+            Get.offAllNamed(Routes.HOME);
+          } else {
+            Get.offAllNamed(Routes.AUTH);
+          }
         });
-        FirebaseMessaging.instance
-            .getInitialMessage()
-            .then((RemoteMessage message) {
-          Get.snackbar('title', 'Init');
-        });
+
+        await FirebaseMessaging.instance.getInitialMessage().then(
+              (value) => print(value),
+            );
 
         FirebaseMessaging.onMessage.listen((RemoteMessage message) {
           RemoteNotification notification = message.notification;
           AndroidNotification android = message.notification?.android;
 
-          Get.snackbar('title', 'On message');
+          print('On message ${message.data}');
 
           if (notification != null && android != null) {
             flutterLocalNotificationsPlugin.show(
@@ -89,18 +98,25 @@ class MyApp extends StatelessWidget {
             );
           }
         });
+
         FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
           Firebase.initializeApp();
-          Get.snackbar('title', 'On message open app');
+          Get.toNamed(Routes.NOTIFICATIONS, arguments: message.data);
+          print('On message open app ${message.data}');
         });
-
-        await Get.find<SharedPrefs>()
-            .getUserInfo(); // Because the OnInit has initialized before the initialBinding
       },
+      translations: LabelTranslation(),
+      locale: Locale('en', 'US'),
+      fallbackLocale: Locale('en', 'US'),
       debugShowCheckedModeBanner: false,
       title: 'PKS Mobile',
       initialRoute: AppPages.INITIAL,
-      defaultTransition: Transition.rightToLeft,
+      unknownRoute: GetPage(
+          name: '/notfound',
+          page: () => HomeScreen(),
+          transition: Transition.fadeIn,
+          transitionDuration: Duration(milliseconds: 1000)),
+      defaultTransition: Transition.rightToLeftWithFade,
       getPages: AppPages.routes,
     );
   }
